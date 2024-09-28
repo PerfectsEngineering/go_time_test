@@ -2,7 +2,7 @@
 
 #hwclock -s
 
-go build -o time main.go
+go build -o time cmd/time/main.go
 
 go test ./...
 
