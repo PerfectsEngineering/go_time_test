@@ -1,9 +1,12 @@
 package go_time_test
 
 import (
+	"log/slog"
 	"os"
 	"testing"
 	"time"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,8 +14,17 @@ import (
 
 func TestTimeOrder(t *testing.T) {
 	timeBefore := time.Now()
+	slog.Info("timeBefore", "time", timeBefore.String())
+	sysTime(t)
 
 	timeAfter := createRandomFile(t).ModTime()
+
+	sysTime(t)
+
+	timeNowAfter := time.Now()
+
+	duration := timeBefore.Sub(timeAfter)
+	slog.Info("difference", "duration", duration.String(), "timeAfter", timeNowAfter.String())
 
 	assert.True(
 		t,
@@ -28,9 +40,21 @@ func createRandomFile(t *testing.T) os.FileInfo {
 
 	file, err := os.CreateTemp(os.TempDir(), "file")
 	require.NoError(t, err)
+	slog.Info("created file", "file", file.Name())
 
 	fileInfo, err := file.Stat()
 	require.NoError(t, err)
 
 	return fileInfo
+}
+
+func sysTime(t *testing.T) {
+	var timespec unix.Timespec
+	err := unix.ClockGettime(unix.CLOCK_DEFAULT, &timespec)
+
+	require.NoError(t, err)
+
+	sysTime := time.Unix(timespec.Sec, timespec.Nsec)
+
+	slog.Info("sysTime", "time", sysTime.String())
 }
