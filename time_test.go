@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/sys/unix"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,11 +13,8 @@ import (
 func TestTimeOrder(t *testing.T) {
 	timeBefore := time.Now()
 	slog.Info("timeBefore", "time", timeBefore.String())
-	sysTime(t)
 
 	timeAfter := createRandomFile(t).ModTime()
-
-	sysTime(t)
 
 	timeNowAfter := time.Now()
 
@@ -48,13 +43,13 @@ func createRandomFile(t *testing.T) os.FileInfo {
 	return fileInfo
 }
 
-func sysTime(t *testing.T) {
-	var timespec unix.Timespec
-	err := unix.ClockGettime(unix.CLOCK_DEFAULT, &timespec)
+//func sysTime(t *testing.T) {
+//var timespec unix.Timespec
+//err := unix.ClockGettime(unix.CLOCK_DEFAULT, &timespec)
 
-	require.NoError(t, err)
+//require.NoError(t, err)
 
-	sysTime := time.Unix(timespec.Sec, timespec.Nsec)
+//sysTime := time.Unix(timespec.Sec, timespec.Nsec)
 
-	slog.Info("sysTime", "time", sysTime.String())
-}
+//slog.Info("sysTime", "time", sysTime.String())
+//}
