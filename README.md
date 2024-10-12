@@ -43,7 +43,13 @@ I get an error message similar to:
 > You'll also notice the test fails on CircleCI too, which I assume is using a similar Container setup to run the tests.
 
 ### Why does this happen?
+Some filesystems (e.g., ext4) use cached system time for file mod times, refreshed every ~10ms. So `time.Now()` gets the current system time, but 
+file creation uses the last cached time, which may lag slightly.
 
-I'm investigating why this happens, because I assumed time.Now() should be using the system time also used by the filesystem.
+This affects any program comparing times, not just Go. You can test on Linux with ext4:
+```bash
+date +%H:%M:%S.%N; echo "hello" > test1; stat -c %y test1 | cut -d" " -f 2
+```
+You'll see the file's timestamp is before the command's start time.
 
-Please open an issue or reach out to me to let me know if you have an understanding of why this happens.
+More about this can be read in [this thread](https://x.com/Perfectmak/status/1845077025960206778).
